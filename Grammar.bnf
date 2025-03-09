@@ -1,0 +1,49 @@
+<program>          ::= <block>+
+<block>            ::= "frame" <identifier> "{" <declarations> <operations> "}"
+<declarations>     ::= <memory_declaration> | <variable_declaration> | <mapping_declaration> | <type_declaration>+
+<operations>       ::= <operation>+
+<operation>        ::= <simd_op> | <quantum_op> | <aot_op> | <exec_op> | <pkt_op> | <validate_op> | <link_op>
+
+<memory_declaration> ::= "map" <identifier> "{" <map_properties> "}"
+<map_properties>     ::= "src:" <identifier> "," "dst:" <identifier>
+
+<variable_declaration> ::= "var" <type> <identifier> "{" <range_check> "}"
+<type>                ::= "INT" | "FLOAT" | "STRING" | "VECTOR" | "BOOL" | "AOT"
+<range_check>         ::= "range:" <range> "," "check:" <check_type>
+<range>               ::= <number> ".." <number>
+<check_type>          ::= "rigid" | "soft"
+
+<simd_op>            ::= "vec_" <simd_type> { <simd_in> "," <simd_out> "," <simd_options> }
+<simd_type>          ::= "mul" | "add" | "sub" | "div" | "dot" | "cross"
+<simd_in>            ::= "in:" <identifier>
+<simd_out>           ::= "out:" <identifier>
+<simd_options>       ::= "op:" <simd_instruction> | "device:" <device_type>
+<simd_instruction>   ::= "AVX2_vector_multiply" | "AVX512_add" | "SSE_subtract"
+<device_type>        ::= "Ryzen3_CPU" | "Radeon_GPU" | "CPU_GPU"
+
+<quantum_op>         ::= "str_map" <identifier> "{" <quantum_properties> "}"
+<quantum_properties> ::= "op:" <quantum_type> "," "in:" <identifier> "," "out:" <identifier> "," "device:" <device_type>
+<quantum_type>       ::= "gpu_entangle" | "quantum_entangle" | "quantum_transform"
+
+<aot_op>             ::= "AOT" <operation_type> "{" <aot_properties> "}"
+<operation_type>     ::= "PRELINK" | "EXECUTE"
+<aot_properties>     ::= "STATIC" | "size:" <size>
+<size>               ::= <number> "B"
+
+<exec_op>            ::= "exec" <identifier> "{" <exec_properties> "}"
+<exec_properties>    ::= "link:" <identifier> "," "size:" <size> "," "op:" <operation_type> "," "device:" <device_type>
+
+<pkt_op>             ::= "pkt" <identifier> "{" <pkt_properties> "}"
+<pkt_properties>     ::= "size:" <size> "," "exec:" <operation_type> "," "priority:" <cache_level>
+<cache_level>        ::= "L1_cache" | "L2_cache" | "L3_cache"
+
+<validate_op>        ::= "validate" <identifier> "{" <validation_rule> "}"
+<validation_rule>    ::= "rule:" "bounds" | "null_check"
+
+<link_op>            ::= "link" <identifier> "{" <link_properties> "}"
+<link_properties>     ::= "src:" <identifier> "," "dst:" <identifier>
+
+<identifier>         ::= <letter> (<letter> | <digit>)*
+<letter>             ::= [a-zA-Z_]
+<digit>              ::= [0-9]
+<number>             ::= [0-9]+
