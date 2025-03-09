@@ -1,0 +1,19 @@
+Program
+│
+├── Map Declaration (A)
+│   ├── src: RAM
+│   └── dst: GPU
+│
+├── Variable Declaration (temp)
+│   ├── type: INT
+│   ├── range: 0..255
+│   └── check: rigid
+│
+├── AOT Declaration (test)
+│   ├── type: STATIC
+│   └── size: 1024
+│
+└── Packetized Execution (data)
+    ├── size: 512
+    ├── exec: EXECUTE
+    └── priority: RAM
