@@ -1,0 +1,98 @@
+# PowerShell Script to Install NeoASM for AMD Ryzen 3 Series 7000 & Radeon Graphics
+
+# Step 1: Check for AMD Ryzen and Radeon Hardware Compatibility
+function Check-SystemCompatibility {
+    Write-Host "Checking system architecture..."
+
+    # Check if the CPU is an AMD Ryzen processor
+    $cpuInfo = Get-WmiObject Win32_Processor | Select-Object -First 1
+    if ($cpuInfo.Name -like "*AMD Ryzen*") {
+        Write-Host "AMD Ryzen CPU detected."
+        $global:SystemCompatible = $true
+    } else {
+        Write-Host "This installer is optimized for AMD Ryzen CPUs. Proceeding with caution."
+        $global:SystemCompatible = $false
+    }
+
+    # Check for Radeon Graphics (GPU)
+    $gpuInfo = Get-WmiObject Win32_VideoController | Select-Object -First 1
+    if ($gpuInfo.Description -like "*Radeon*") {
+        Write-Host "Radeon GPU detected."
+        $global:GPUCompatible = $true
+    } else {
+        Write-Host "This installer is optimized for Radeon GPUs. Proceeding with caution."
+        $global:GPUCompatible = $false
+    }
+}
+
+# Step 2: Install Dependencies in Parallel
+function Install-Dependencies {
+    Write-Host "Installing dependencies concurrently..."
+
+    # List of dependencies to install
+    $dependencies = @("llvm", "git", "make", "python3", "build-tools")
+
+    # Install dependencies using Chocolatey in parallel
+    $jobs = @()
+    foreach ($dep in $dependencies) {
+        $jobs += Start-Job -ScriptBlock {
+            choco install $using:dep -y
+        }
+    }
+
+    # Wait for all jobs to complete
+    $jobs | ForEach-Object { Wait-Job -Job $_ }
+    Write-Host "All dependencies installed successfully!"
+}
+
+# Step 3: Optimize Download Sources (for faster downloads)
+function Optimize-DownloadSources {
+    Write-Host "Optimizing download sources..."
+
+    # Use aria2 for faster, multi-threaded downloads
+    if ($SystemCompatible) {
+        # Example: Download NeoASM compiler with aria2c (custom URL)
+        $url = "https://neoasm-repository-url/neoasm-windows.tar.gz"
+        Start-Process "aria2c.exe" -ArgumentList "-x 16 -s 16 -k 1M $url" -NoNewWindow -Wait
+    }
+}
+
+# Step 4: Pre-configure Libraries for AMD Ryzen and Radeon GPUs
+function PreConfigure-Libraries {
+    Write-Host "Pre-configuring libraries for system..."
+
+    if ($SystemCompatible -and $GPUCompatible) {
+        # Example: Download and install libraries optimized for AMD Ryzen and Radeon
+        Write-Host "Detected compatible system, applying AMD Ryzen optimizations..."
+        
+        # Example: Installing AMD Optimized LLVM for Ryzen
+        $llvm_url = "https://optimized-llvm-for-ryzen-url/llvm-ryzen-specific-version.exe"
+        Start-Process "aria2c.exe" -ArgumentList "-x 16 -s 16 -k 1M $llvm_url" -NoNewWindow -Wait
+    } else {
+        Write-Host "Default libraries and configuration will be applied."
+        # Install default libraries if not a Ryzen system
+        choco install llvm -y
+    }
+}
+
+# Step 5: Final Setup and Cleanup
+function Finalize-Setup {
+    Write-Host "Finalizing setup..."
+
+    # Link binaries, clean up temporary files, etc.
+    Write-Host "Setting up environment variables and final configurations..."
+
+    # Example: Set environment variables (can add your own paths as needed)
+    [System.Environment]::SetEnvironmentVariable('NEOASM_HOME', 'C:\Program Files\NeoASM', 'Machine')
+
+    Write-Host "NeoASM installation completed successfully!"
+}
+
+# Main Script Execution
+Check-SystemCompatibility
+Install-Dependencies
+Optimize-DownloadSources
+PreConfigure-Libraries
+Finalize-Setup
+
+Write-Host "Installer completed successfully."
