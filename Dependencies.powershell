@@ -1,0 +1,2 @@
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
